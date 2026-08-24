@@ -27,6 +27,68 @@ export function calculateSectionProgress(completedSectionIds: string[], totalSec
   return Math.round((new Set(completedSectionIds).size / totalSections) * 100);
 }
 
+export interface AppliedCompletionGate {
+  canComplete: boolean;
+  missingRequirements: string[];
+  completedRequirements: string[];
+  nextRequiredAction: string;
+}
+
+export function getAppliedCompletionGate(data: AppDataEnvelope, lesson: LessonContent): AppliedCompletionGate {
+  const exerciseComplete = data.curriculumProgress.exerciseStatus[lesson.id] === 'completed';
+  const quizComplete = data.quizAttempts.some((attempt) => attempt.lessonId === lesson.id);
+  const dailyReviewComplete = data.dailyReviews.some(
+    (review) => review.lessonId === lesson.id && review.status === 'completed'
+  );
+  const actionContract = data.reviews
+    .filter((contract) => contract.lessonId === lesson.id)
+    .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0];
+  const hasRealAction = Boolean(
+    actionContract &&
+      actionContract.status !== 'skipped' &&
+      actionContract.what.trim() &&
+      actionContract.when.trim() &&
+      actionContract.minimumAcceptableAction.trim() &&
+      actionContract.evidenceOfCompletion.trim()
+  );
+
+  const missingRequirements: string[] = [];
+  const completedRequirements: string[] = [];
+
+  if (exerciseComplete) {
+    completedRequirements.push('Decision Canvas เสร็จแล้ว');
+  } else {
+    missingRequirements.push('ทำ Decision Canvas อย่างน้อยช่องบังคับ');
+  }
+
+  if (quizComplete) {
+    completedRequirements.push('Quiz เสร็จแล้ว');
+  } else {
+    missingRequirements.push('ทำ Quiz เพื่อจับ weak area');
+  }
+
+  if (hasRealAction) {
+    completedRequirements.push('มี Action Contract จริงภายใน 24 ชั่วโมง');
+  } else {
+    missingRequirements.push('สร้าง Action Contract ที่มี action, เวลา, minimum action และหลักฐานว่าเสร็จ');
+  }
+
+  if (dailyReviewComplete) {
+    completedRequirements.push('Daily Review เสร็จแล้ว');
+  } else {
+    missingRequirements.push('เขียน Daily Review อย่างน้อยหนึ่งรอบ');
+  }
+
+  return {
+    canComplete: hasRealAction && exerciseComplete && quizComplete && dailyReviewComplete,
+    missingRequirements,
+    completedRequirements,
+    nextRequiredAction:
+      missingRequirements[0] ??
+      'ลงมือทำ Action Contract ภายใน 24 ชั่วโมง แล้วกลับมาทบทวนผลจริง'
+  };
+}
+
 export function calculateNextStreak(lastStudyDate: string | null, today: string, currentStreak: number): number {
   if (lastStudyDate === today) {
     return currentStreak;

@@ -11,6 +11,7 @@ import type { ActionContract, AppDataEnvelope, DecisionCanvasResponse } from '..
 import { createDailyHabitPlan } from '../domain/services/dailyHabitService';
 import {
   calculateSectionProgress,
+  getAppliedCompletionGate,
   getLessonProgress,
   getOrCreateExercise,
   markLessonComplete,
@@ -57,6 +58,7 @@ export function TodayPage({ data, onSave }: TodayPageProps) {
   const quizAttempts = data.quizAttempts.filter((attempt) => attempt.lessonId === lesson.id);
   const latestQuiz = quizAttempts[quizAttempts.length - 1] ?? null;
   const habitPlan = createDailyHabitPlan(data);
+  const completionGate = getAppliedCompletionGate(data, lesson);
   const [showAudio, setShowAudio] = useState(false);
 
   const currentSection = useMemo(
@@ -103,9 +105,8 @@ export function TodayPage({ data, onSave }: TodayPageProps) {
   }
 
   function handleMarkComplete(): void {
-    const exerciseComplete = data.curriculumProgress.exerciseStatus[lesson.id] === 'completed';
-    const quizComplete = data.quizAttempts.some((attempt) => attempt.lessonId === lesson.id);
-    if ((!exerciseComplete || !quizComplete) && !window.confirm('แบบฝึกหัดหรือ quiz ยังไม่ครบ ต้องการจบบทเรียนนี้เลยหรือไม่?')) {
+    if (!completionGate.canComplete) {
+      window.alert(`ยังจบบทเรียนไม่ได้ เพราะระบบนี้นับผลจากการลงมือจริง\n\nสิ่งที่ต้องทำต่อ:\n- ${completionGate.missingRequirements.join('\n- ')}`);
       return;
     }
     save(markLessonComplete(data, lesson, lesson.estimatedMinutes));
@@ -151,6 +152,25 @@ export function TodayPage({ data, onSave }: TodayPageProps) {
             {completed ? 'เรียนจบแล้ว' : 'บันทึกว่าเรียนจบ'}
           </button>
         </div>
+        <section className="completion-gate" aria-labelledby="completion-gate-title">
+          <div>
+            <p className="eyebrow">Applied Decision Gate</p>
+            <h3 id="completion-gate-title">{completionGate.canComplete ? 'พร้อมจบบทเรียนแบบมี action จริง' : 'ยังจบบทเรียนไม่ได้จนกว่าจะมี action จริง'}</h3>
+            <p>{completionGate.nextRequiredAction}</p>
+          </div>
+          <div className="gate-grid">
+            {completionGate.completedRequirements.map((item) => (
+              <span className="gate-pill done" key={item}>
+                ผ่าน: {item}
+              </span>
+            ))}
+            {completionGate.missingRequirements.map((item) => (
+              <span className="gate-pill todo" key={item}>
+                ต้องทำ: {item}
+              </span>
+            ))}
+          </div>
+        </section>
         {completed ? (
           <p className="status-note">บทเรียนนี้จบแล้ว ขั้นต่อไปคือทบทวน Action Contract และลงมือภายใน 24 ชั่วโมง</p>
         ) : null}

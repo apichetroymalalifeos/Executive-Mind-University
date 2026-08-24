@@ -1,0 +1,35 @@
+{
+  "name": "Executive Mind University",
+  "short_name": "Exec Mind",
+  "description": "Local-first learning and applied decision operating system",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "browser"],
+  "background_color": "#f6f3ee",
+  "theme_color": "#23443d",
+  "orientation": "portrait",
+  "lang": "th",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "เรียนวันนี้",
+      "short_name": "Today",
+      "url": "./#/today",
+      "description": "Open today's applied learning loop"
+    },
+    {
+      "name": "รีวิว",
+      "short_name": "Review",
+      "url": "./#/review",
+      "description": "Review decisions and action contracts"
+    }
+  ]
+}

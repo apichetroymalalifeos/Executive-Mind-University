@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { ActionContract } from '../../domain/entities/appData';
 
 interface ActionContractPanelProps {
@@ -25,6 +25,22 @@ export function ActionContractPanel({ contract, onSave, onStatusChange }: Action
     outcomeReview: contract?.outcomeReview ?? null
   });
   const [outcomeReview, setOutcomeReview] = useState(contract?.outcomeReview ?? '');
+  const missingRequired = useMemo(() => {
+    const missing: string[] = [];
+    if (!draft.what.trim()) {
+      missing.push('Action ที่จะทำ');
+    }
+    if (!draft.when.trim()) {
+      missing.push('จะทำเมื่อไร');
+    }
+    if (!draft.minimumAcceptableAction.trim()) {
+      missing.push('เวอร์ชันเล็กที่สุดที่นับว่าได้ลงมือ');
+    }
+    if (!draft.evidenceOfCompletion.trim()) {
+      missing.push('หลักฐานว่าเสร็จ');
+    }
+    return missing;
+  }, [draft.evidenceOfCompletion, draft.minimumAcceptableAction, draft.what, draft.when]);
 
   function update(key: keyof typeof draft, value: string): void {
     setDraft((current) => ({ ...current, [key]: value }));
@@ -67,8 +83,11 @@ export function ActionContractPanel({ contract, onSave, onStatusChange }: Action
           <textarea rows={2} value={draft.reviewDate} onChange={(event) => update('reviewDate', event.target.value)} />
         </label>
       </div>
+      {missingRequired.length > 0 ? (
+        <p className="empty-note">ต้องกรอกก่อนบันทึก action จริง: {missingRequired.join(', ')}</p>
+      ) : null}
       <div className="reader-actions">
-        <button type="button" className="primary-action" onClick={save}>
+        <button type="button" className="primary-action" onClick={save} disabled={missingRequired.length > 0}>
           บันทึก action
         </button>
         {contract ? (
