@@ -1,0 +1,22 @@
+export const futureSkills = [
+  'AI literacy',
+  'Human-AI collaboration',
+  'Critical thinking',
+  'Systems thinking',
+  'Probabilistic thinking',
+  'Adaptability',
+  'Learning agility',
+  'Creativity',
+  'Communication',
+  'Negotiation',
+  'Leadership',
+  'Ethics',
+  'Media and information literacy',
+  'Cybersecurity awareness',
+  'Data literacy',
+  'Entrepreneurial thinking',
+  'Emotional regulation',
+  'Resilience',
+  'Scenario planning',
+  'Long-term thinking'
+] as const;
