@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { DailyReviewEntry } from '../../domain/entities/appData';
 import { LESSON_1_ID } from '../../content/lessons/lesson1';
 
@@ -18,6 +18,28 @@ export function DailyReviewPanel({ review, actionContractId, onSave }: DailyRevi
     whatWillIDoWithin24Hours: review?.whatWillIDoWithin24Hours ?? '',
     whatShouldIReviewLater: review?.whatShouldIReviewLater ?? ''
   });
+
+  useEffect(() => {
+    setDraft({
+      id: review?.id,
+      whatDidILearn: review?.whatDidILearn ?? '',
+      whatSurprisedMe: review?.whatSurprisedMe ?? '',
+      whereCanIApplyThis: review?.whereCanIApplyThis ?? '',
+      whatDecisionBecameClearer: review?.whatDecisionBecameClearer ?? '',
+      whatWillIDoWithin24Hours: review?.whatWillIDoWithin24Hours ?? '',
+      whatShouldIReviewLater: review?.whatShouldIReviewLater ?? ''
+    });
+  }, [
+    actionContractId,
+    review?.id,
+    review?.updatedAt,
+    review?.whatDecisionBecameClearer,
+    review?.whatDidILearn,
+    review?.whatShouldIReviewLater,
+    review?.whatSurprisedMe,
+    review?.whatWillIDoWithin24Hours,
+    review?.whereCanIApplyThis
+  ]);
 
   function update(key: keyof typeof draft, value: string): void {
     setDraft((current) => ({ ...current, [key]: value }));

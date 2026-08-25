@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import type { ActionContract } from '../../domain/entities/appData';
 
 interface ActionContractPanelProps {
@@ -25,6 +25,32 @@ export function ActionContractPanel({ contract, onSave, onStatusChange }: Action
     outcomeReview: contract?.outcomeReview ?? null
   });
   const [outcomeReview, setOutcomeReview] = useState(contract?.outcomeReview ?? '');
+
+  useEffect(() => {
+    setDraft({
+      id: contract?.id,
+      what: contract?.what ?? '',
+      whyItMatters: contract?.whyItMatters ?? '',
+      when: contract?.when ?? 'วันนี้',
+      minimumAcceptableAction: contract?.minimumAcceptableAction ?? '',
+      evidenceOfCompletion: contract?.evidenceOfCompletion ?? '',
+      reviewDate: contract?.reviewDate ?? '',
+      status: contract?.status ?? 'planned',
+      outcomeReview: contract?.outcomeReview ?? null
+    });
+    setOutcomeReview(contract?.outcomeReview ?? '');
+  }, [
+    contract?.evidenceOfCompletion,
+    contract?.id,
+    contract?.minimumAcceptableAction,
+    contract?.outcomeReview,
+    contract?.reviewDate,
+    contract?.status,
+    contract?.updatedAt,
+    contract?.what,
+    contract?.when,
+    contract?.whyItMatters
+  ]);
   const missingRequired = useMemo(() => {
     const missing: string[] = [];
     if (!draft.what.trim()) {

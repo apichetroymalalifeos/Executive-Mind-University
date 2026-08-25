@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { DailyHabitGuide } from '../components/learning/DailyHabitGuide';
 import { getPrimaryLesson } from '../content/lessons/lessonRepository';
 import type { AppDataEnvelope } from '../domain/entities/appData';
+import { createAppliedDecisionScorecard } from '../domain/services/appliedDecisionService';
 import { createDailyHabitPlan } from '../domain/services/dailyHabitService';
 import type { DailyLearningRecommendation } from '../domain/services/engineContracts';
 import {
@@ -26,6 +27,7 @@ export function HomePage({ data, recommendation }: HomePageProps) {
   const currentSection = lesson.sections.find((section) => section.id === progress?.currentSectionId) ?? lesson.sections[0];
   const habitPlan = createDailyHabitPlan(data);
   const completionGate = getAppliedCompletionGate(data, lesson);
+  const appliedScorecard = createAppliedDecisionScorecard(data);
   if (!currentSection) {
     return null;
   }
@@ -85,6 +87,18 @@ export function HomePage({ data, recommendation }: HomePageProps) {
               ต้องทำ: {item}
             </span>
           ))}
+        </div>
+      </section>
+
+      <section className="scorecard-panel" aria-labelledby="applied-score-title">
+        <div>
+          <p className="eyebrow">Applied Decision Score</p>
+          <h3 id="applied-score-title">{appliedScorecard.score}/100</h3>
+          <p>{appliedScorecard.level}</p>
+        </div>
+        <div>
+          <strong>จุดที่ควรทำต่อ</strong>
+          <p>{appliedScorecard.nextImprovement}</p>
         </div>
       </section>
 

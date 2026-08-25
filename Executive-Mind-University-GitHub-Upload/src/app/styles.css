@@ -276,6 +276,37 @@ input:focus-visible {
   color: #5c3b14;
 }
 
+.scorecard-panel {
+  align-items: center;
+  background: #203a35;
+  border-radius: 8px;
+  color: #ffffff;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(140px, 0.7fr) 1fr;
+  padding: 18px;
+}
+
+.scorecard-panel h3,
+.scorecard-panel p {
+  color: inherit;
+  margin: 0;
+}
+
+.scorecard-panel h3 {
+  font-size: clamp(2rem, 8vw, 3.4rem);
+}
+
+.scorecard-panel strong {
+  color: #dceee5;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.scorecard-panel .eyebrow {
+  color: #cfe4db;
+}
+
 .summary-grid {
   color: #52625e;
   display: grid;
@@ -615,5 +646,9 @@ select {
   .danger-action,
   .file-action {
     width: 100%;
+  }
+
+  .scorecard-panel {
+    grid-template-columns: 1fr;
   }
 }

@@ -2,6 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { lesson1 } from '../content/lessons/lesson1';
 import { createDefaultEnvelope, createEmptyDecisionCanvas } from '../infrastructure/storage/defaultData';
 import {
+  createAppliedDecisionScorecard,
+  createWeeklyAppliedReviewSummary
+} from '../domain/services/appliedDecisionService';
+import {
   getAppliedCompletionGate,
   saveDailyReview,
   saveExerciseDraft,
@@ -66,5 +70,54 @@ describe('phase 3 applied decision gate', () => {
     expect(gate.canComplete).toBe(true);
     expect(gate.missingRequirements).toHaveLength(0);
     expect(gate.completedRequirements).toContain('มี Action Contract จริงภายใน 24 ชั่วโมง');
+  });
+
+  it('scores applied decision behavior from real learning signals', () => {
+    const fields = {
+      ...createEmptyDecisionCanvas(),
+      decisionTitle: 'Call aviation prospect',
+      realProblem: 'Need to identify the actual certification risk',
+      facts: 'Prospect asked for material options',
+      nextActionWithin24Hours: 'Ask for the required standard'
+    };
+    const withExercise = saveExerciseDraft(createDefaultEnvelope(), lesson1.id, fields, true);
+    const withAction = upsertActionContract(withExercise, lesson1.id, {
+      what: 'Ask the customer which certification blocks the project',
+      whyItMatters: 'The next offer depends on the real constraint',
+      when: 'Today 16:00',
+      minimumAcceptableAction: 'Send one clear question',
+      evidenceOfCompletion: 'CRM note',
+      reviewDate: '2026-07-19',
+      status: 'completed',
+      completedAt: '2026-07-18T09:00:00.000Z',
+      outcomeReview: 'Customer clarified the required standard'
+    });
+
+    const scorecard = createAppliedDecisionScorecard(withAction);
+
+    expect(scorecard.score).toBeGreaterThan(40);
+    expect(scorecard.completedSignals).toContain('มี Action Contract ที่ลงมือได้จริง');
+    expect(scorecard.completedSignals).toContain('มีการทบทวนผลจริงหลังลงมือ');
+    expect(scorecard.actionCompletionRate).toBe(100);
+  });
+
+  it('summarizes the weekly applied review window', () => {
+    const now = new Date('2026-07-18T12:00:00.000Z');
+    const withAction = upsertActionContract(createDefaultEnvelope('2026-07-18T08:00:00.000Z'), lesson1.id, {
+      what: 'Follow up hotel buyer',
+      whyItMatters: 'Clarify decision criteria',
+      when: 'Today',
+      minimumAcceptableAction: 'Send one message',
+      evidenceOfCompletion: 'CRM note',
+      reviewDate: '2026-07-19',
+      status: 'planned',
+      outcomeReview: null
+    });
+
+    const summary = createWeeklyAppliedReviewSummary(withAction, now);
+
+    expect(summary.windowLabel).toBe('7 วันล่าสุด');
+    expect(summary.actionsCreated).toBe(1);
+    expect(summary.nextReviewFocus).toContain('สร้าง action');
   });
 });

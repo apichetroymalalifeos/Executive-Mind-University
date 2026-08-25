@@ -40,7 +40,9 @@ export function App() {
           <Route path="/future" element={<FuturePage scenarios={data.futureScenarios} />} />
           <Route
             path="/review"
-            element={<ReviewPage reviews={data.reviews} dailyReviews={data.dailyReviews} decisions={data.decisions} />}
+            element={
+              <ReviewPage data={data} reviews={data.reviews} dailyReviews={data.dailyReviews} decisions={data.decisions} />
+            }
           />
           <Route
             path="/knowledge"
